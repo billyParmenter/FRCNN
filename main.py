@@ -29,11 +29,17 @@ data_loader = torch.utils.data.DataLoader(
 # select device (whether GPU or CPU)
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
+i = 0
 # DataLoader is iterable over Dataset
 for imgs, annotations in data_loader:
+    if i > 100:
+        break
+    if len(annotations[0]['boxes']) == 0:
+        continue
+    else:
+        i += 1
     imgs = list(img.to(device) for img in imgs)
     annotations = [{k: v.to(device) for k, v in t.items()} for t in annotations]
-    print(annotations)
 
 
 model = get_model_object_detector(config.num_classes)
@@ -58,7 +64,13 @@ for epoch in range(config.num_epochs):
     model.train()
     i = 0
     for imgs, annotations in data_loader:
-        i += 1
+        if i > 100:
+            break
+        if len(annotations[0]['boxes']) == 0:
+            continue
+        else:
+            i += 1
+
         imgs = list(img.to(device) for img in imgs)
         annotations = [{k: v.to(device) for k, v in t.items()} for t in annotations]
         loss_dict = model(imgs, annotations)
@@ -70,4 +82,4 @@ for epoch in range(config.num_epochs):
 
         print(f"Iteration: {i}/{len_dataloader}, Loss: {losses}")
 
-save_model(config.num_epochs, model, optimizer, save_name=config.save_model_name)
+save_model(config.num_epochs, model, optimizer)
