@@ -7,6 +7,7 @@ from pycocotools.coco import COCO
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 
+
 class myOwnDataset(torch.utils.data.Dataset):
     def __init__(self, root, annotation, transforms=None):
         self.root = root
@@ -70,6 +71,59 @@ class myOwnDataset(torch.utils.data.Dataset):
         return len(self.ids)
 
 
+from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.structures import BoxMode
+import json
+import os
+
+def register_datasets():
+    # Specify the paths to your JSON annotation files and image root directories
+    train_json_path = './data/frc/train/_annotations.coco.json'
+    test_json_path = "./data/frc/test/_annotations.coco.json"
+    train_image_root = "./data/frc/train"
+    test_image_root = "./data/frc/test"
+
+    # Register the train dataset
+    DatasetCatalog.register("train", lambda: load_coco_json(train_json_path, train_image_root))
+    MetadataCatalog.get("train").set(thing_classes=["cubes_cones", "cube", "cone", "tipped"])  # List your class names
+
+    # Register the test dataset
+    DatasetCatalog.register("test", lambda: load_coco_json(test_json_path, test_image_root))
+    MetadataCatalog.get("test").set(thing_classes=["cubes_cones", "cube", "cone", "tipped"])  # List your class names
+
+def load_coco_json(json_file, image_root):
+    with open(json_file) as f:
+        coco_json = json.load(f)
+    dataset_dicts = []
+    for idx, entry in enumerate(coco_json["images"]):
+        record = {}
+        record["file_name"] = os.path.join(image_root, entry["file_name"])
+        record["image_id"] = idx
+        record["height"] = entry["height"]
+        record["width"] = entry["width"]
+        ann_ids = coco_json.get("annotations", [])
+        objs = []
+        for ann in ann_ids:
+            if ann["image_id"] == entry["id"]:
+                obj = {
+                    "bbox": ann["bbox"],
+                    "bbox_mode": BoxMode.XYWH_ABS,
+                    "category_id": ann["category_id"],
+                }
+                objs.append(obj)
+        record["annotations"] = objs
+        
+        # Loop through the annotations and assign a default category to images without categories
+        default_category_id = -1  # Choose an appropriate default category ID
+        for annotation in record["annotations"]:
+            if "category_id" not in annotation:
+                annotation["category_id"] = default_category_id
+        
+        dataset_dicts.append(record)
+    return dataset_dicts
+
+
+
 # In my case, just added ToTensor
 def get_transform():
     custom_transforms = []
@@ -84,7 +138,7 @@ def collate_fn(batch):
 
 def get_model_object_detector(num_classes):
     # load an instance segmentation model pre-trained pre-trained on COCO
-    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False)
+    model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
@@ -92,7 +146,7 @@ def get_model_object_detector(num_classes):
 
     return model
 
-def save_model(epoch, model, optimizer):
+def save_model(name, epoch, model, optimizer):
     """
     Function to save the trained model till current epoch, or whenver called
     """
@@ -100,4 +154,4 @@ def save_model(epoch, model, optimizer):
                 'epoch': epoch+1,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                }, 'result/last_model.pth')
+                }, f'result/{name}')

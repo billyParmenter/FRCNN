@@ -1,0 +1,24 @@
+# Basic Detectron2 Configuration for Object Detection Training
+
+# Specify the training dataset
+DATASETS:
+  TRAIN: ("train",)
+  TEST: ("test",)
+
+# Specify the model to use
+MODEL:
+  WEIGHTS: "detectron2://COCO-Detection/faster_rcnn_R_50_FPN_3x/137849458/model_final_f6e8b1.pkl"
+  ROI_HEADS:
+    NUM_CLASSES: 3  # Replace N with the number of classes in your dataset
+
+# Specify the training settings
+SOLVER:
+  MAX_ITER: 10000
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.001
+  STEPS: (8000,)
+
+# Specify output directory for logs and model checkpoints
+OUTPUT_DIR: "./output"
+
+# Other optional settings can be added here

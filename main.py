@@ -32,8 +32,8 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 i = 0
 # DataLoader is iterable over Dataset
 for imgs, annotations in data_loader:
-    if i > 100:
-        break
+    # if i > config.num_images:
+    #     break
     if len(annotations[0]['boxes']) == 0:
         continue
     else:
@@ -64,13 +64,12 @@ for epoch in range(config.num_epochs):
     model.train()
     i = 0
     for imgs, annotations in data_loader:
-        if i > 100:
+        if i > config.num_images:
             break
         if len(annotations[0]['boxes']) == 0:
             continue
-        else:
-            i += 1
 
+        i += 1
         imgs = list(img.to(device) for img in imgs)
         annotations = [{k: v.to(device) for k, v in t.items()} for t in annotations]
         loss_dict = model(imgs, annotations)

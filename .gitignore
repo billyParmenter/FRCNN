@@ -1,7 +1,8 @@
 __pycache__
 result/
 data/
-
+output_directory/
+*.pth
 #*
 .#*
 *~
