@@ -8,7 +8,7 @@ from detectron2.data import MetadataCatalog
 
 # Load the configuration and model
 cfg = get_cfg()
-cfg.merge_from_file("/home/billy/src/detectron2/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
+cfg.merge_from_file("../../detectron2/configs/COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml")
 cfg.MODEL.WEIGHTS = os.path.join("./output_directory/model_final.pth")  # Path to your trained model weights
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # Set the threshold for object detection
 predictor = DefaultPredictor(cfg)

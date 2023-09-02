@@ -1,6 +1,6 @@
 # # path to your own data and coco file
-train_data_dir = "/home/billy/src/FML/frcnn_medium_sample/my_data/frc/train"
-train_coco = "/home/billy/src/FML/frcnn_medium_sample/my_data/frc/train/_annotations.coco.json"
+train_data_dir = "./data/frc/train"
+train_coco = "./data/frc/train/_annotations.coco.json"
 
 # train_data_dir = "data/train"
 # train_coco = "data/my_train_coco.json"
@@ -15,7 +15,7 @@ num_workers_dl = 4
 # Params for training
 
 # Two classes; Only target class or background
-num_classes = 3
+num_classes = 9
 num_epochs = 5
 num_images = 50
 
@@ -28,5 +28,5 @@ save_model_name = 'result/last_model.pth'
 result_img_dir = 'result/imgs'
 detection_threshold = 0.8
 test_data_dir = 'data/test'
-test_img_format = 'jpg'
+test_img_format = 'png'
 
